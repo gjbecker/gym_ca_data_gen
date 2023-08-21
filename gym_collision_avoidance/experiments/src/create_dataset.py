@@ -123,8 +123,7 @@ def main():
                     file_dir = os.path.dirname(os.path.realpath(__file__))+ "/../../../DATA/datasets/{}_{}_agent_{}".format(policy, num_agents, num_test_cases)
                     with open(file_dir + '.pkl', 'wb') as handle:
                         pickle.dump(datasets, handle, protocol=pickle.HIGHEST_PROTOCOL)       
-                    print(f'Length: {len(datasets)}')
-                    print(f'Datasets[0]: {datasets[0]}')
+                    print(f'Generated Dataset Length: {len(datasets)}')
 
                 if Config.RECORD_PICKLE_FILES:
                     file_dir = os.path.dirname(

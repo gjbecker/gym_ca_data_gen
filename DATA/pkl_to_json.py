@@ -21,9 +21,6 @@ try:
     print(len(data))
     print(len(data[0]))
     print(len(data[0][0]))
-    print(data[0][0])
-    print(data[1][0])
-    print(data[2][0])
 except:
     print('')
 
