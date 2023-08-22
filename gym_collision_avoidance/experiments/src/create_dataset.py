@@ -49,8 +49,8 @@ def main():
     Config.RECORD_PICKLE_FILES = True
     Config.GENERATE_DATASET = True
 
-    num_agents_to_test = range(2,3)
-    num_test_cases = 1
+    num_agents_to_test = range(2,11)
+    num_test_cases = 10000
 
     test_case_fn = tc.get_testcase_random
     test_case_args = {
