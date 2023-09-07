@@ -27,14 +27,15 @@ def reset_env(
     policy,
     prev_agents,
 ):
-    env.unwrapped.plot_policy_name = policy
+    # env.unwrapped.plot_policy_name = policy
     test_case_args["num_agents"] = num_agents
     test_case_args["prev_agents"] = prev_agents
     agents = test_case_fn(**test_case_args)
     
     env.set_agents(agents)
     init_obs = env.reset()
-    env.unwrapped.test_case_index = test_case
+    print(f'ENV: {env}')
+    # env.unwrapped.test_case_index = test_case
     return init_obs, agents
 
 
@@ -49,8 +50,8 @@ def main():
     Config.RECORD_PICKLE_FILES = True
     Config.GENERATE_DATASET = True
 
-    num_agents_to_test = range(2,11)
-    num_test_cases = 10000
+    num_agents_to_test = range(3,4)
+    num_test_cases = 1
 
     test_case_fn = tc.get_testcase_random
     test_case_args = {
@@ -61,8 +62,9 @@ def main():
             'speed_bnds': [0.5, 2.0],
             'radius_bnds': [0.2, 0.8],
             'side_length': [
-                {'num_agents': [0,5], 'side_length': [4,5]}, 
-                {'num_agents': [5,np.inf], 'side_length': [6,8]},
+                {'num_agents': [0,5], 'side_length': [4,7]}, 
+                {'num_agents': [5,9], 'side_length': [7,11]},
+                {'num_agents': [9,np.inf], 'side_length': [10,13]}
                 ],
             'agents_sensors': ['other_agents_states'],
         }

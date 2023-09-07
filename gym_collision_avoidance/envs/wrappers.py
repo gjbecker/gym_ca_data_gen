@@ -164,6 +164,9 @@ class MultiagentDictToMultiagentArrayWrapper(MultiagentFlattenDictWrapper):
     def observation(self, observation):
         # Turn multiagent dict obs into a 2d array
         # with shape (max_num_agents, num_states_per_agent)
+        print('OBS')
+        print(type(observation))
+        # print(observation[0])
         assert isinstance(observation, dict)
         obs = np.zeros(shape=self.obs_shape)
         for agent in range(self.max_num_agents):

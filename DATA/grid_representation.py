@@ -47,7 +47,7 @@ def draw(grid, RES, side, x_coord, y_coord, rad, value, print_grid=False):
     return grid
 
 
-def episode_grid(episode, RES=8, side=4, agent_r=2, goal_r=0.2, plot=False):
+def episode_grid(episode, RES=512, side=15, agent_r=2, goal_r=0.2, plot=False):
     scale = {
         'empty': 0,
         'ego agent': 1,
@@ -58,28 +58,36 @@ def episode_grid(episode, RES=8, side=4, agent_r=2, goal_r=0.2, plot=False):
     agents = np.arange(len(episode['radii']))
     radii = episode['radii']
     goals = episode['goals']
+    actions = episode['actions']
     end = len(episode['states'][0])
     
     # Cycle through each agent as ego for all episodes
     for ego in range(len(agents)):      
         # Draw goal for ego agent
+        first = True
         empty_grid = np.zeros((RES,RES))
         grid_goal = draw(np.copy(empty_grid), RES, side, goals[ego][0], goals[ego][1], goal_r, scale['ego goal'])
         obs = []
         for step in range(episode['steps']):
             grid = np.copy(grid_goal)
+            head_grid = np.copy(empty_grid)
+            speed_grid = np.copy(empty_grid)
             states = episode['states']
             # Draw positions for agents
             for agent in agents:
                 if agent == ego:
                     grid = draw(grid, RES, side, states[agent][step][0], states[agent][step][1], radii[agent], scale['ego agent'])
+                    heading = draw(head_grid, RES, side, states[agent][step][0], states[agent][step][1], radii[agent], states[agent][step][2])   # heading channel for ego agent only
                 else:
                     grid = draw(grid, RES, side, states[agent][step][0], states[agent][step][1], radii[agent], scale['other agents'])
-            obs.append(np.copy(grid))
+                speed = draw(speed_grid, RES, side, states[agent][step][0], states[agent][step][1], radii[agent], actions[agent][step][0])    # draw speeds for all agents
+            obs.extend([[np.copy(grid), np.copy(speed), np.copy(heading)]])
             step += 1
             if plot and (step % 10 == 0 or step == 1 or step == end):
                 plt.imshow(grid, cmap=cm.gray)
                 plt.title('Step: ' + str(step))
                 plt.show()
+        # print(f'STEP: {step}, OBS SHAPE: {np.array(obs).shape}')
+        # print(f'OBS RESHAPE: {np.array(obs).reshape((-1,3,RES,RES)).shape}')
         return_states.append(obs)
     return return_states

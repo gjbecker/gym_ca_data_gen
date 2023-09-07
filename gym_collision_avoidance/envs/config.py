@@ -54,11 +54,13 @@ class Config(object):
             'policy_to_ensure': 'RVO',
             'policies': ['RVO', 'noncoop', 'static', 'random'],
             'policy_distr': [0.75, 0.10, 0.075, 0.075],
+            # 'policy_distr': [1, 0, 0, 0],
             'speed_bnds': [0.5, 2.0],
             'radius_bnds': [0.2, 0.8],
             'side_length': [
-                {'num_agents': [0,5], 'side_length': [4,5]}, 
-                {'num_agents': [5,np.inf], 'side_length': [6,8]},
+                {'num_agents': [0,5], 'side_length': [4,7]}, 
+                {'num_agents': [5,9], 'side_length': [7,11]},
+                {'num_agents': [9,np.inf], 'side_length': [10,13]}
                 ],
             'agents_sensors': ['other_agents_states'],
         }
@@ -316,7 +318,7 @@ class DataGeneration(EvaluateConfig):
         self.PLT_LIMITS = [[-15, 15], [-15, 15]]
 
         self.NUM_TEST_CASES = 100
-        self.NUM_AGENTS_TO_TEST = range(5,10)
+        self.NUM_AGENTS_TO_TEST = range(2,11)
         self.RECORD_PICKLE_FILES = True
         self.GENERATE_DATASET = True
 
@@ -328,8 +330,9 @@ class DataGeneration(EvaluateConfig):
             'speed_bnds': [0.5, 2.0],
             'radius_bnds': [0.2, 0.8],
             'side_length': [
-                {'num_agents': [0,5], 'side_length': [5,7]}, 
-                {'num_agents': [5,np.inf], 'side_length': [7,10]},
+                {'num_agents': [0,5], 'side_length': [4,7]}, 
+                {'num_agents': [5,9], 'side_length': [7,11]},
+                {'num_agents': [9,np.inf], 'side_length': [10,13]}
                 ],
             'agents_sensors': ['other_agents_states'],
         }
