@@ -165,8 +165,8 @@ def generate_rand_case(num_agents, side_length, speed_bnds, radius_bnds,
             # generate random starting/ending points
             counter += 1
             # side_length *= 1.01
-            if counter == 1 or counter % 5 == 0:
-                print(f'SIDE: {side_length}, COUNT: {counter}')
+            # if counter == 1 or counter % 5 == 0:
+            #     print(f'SIDE: {side_length}, COUNT: {counter}')
             start = side_length * 2 * np.random.rand(2,) - side_length
             end = side_length * 2 * np.random.rand(2,) - side_length
             # make end point near the goal ## NOT USED??

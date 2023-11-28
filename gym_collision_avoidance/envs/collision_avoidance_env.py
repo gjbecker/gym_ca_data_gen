@@ -191,7 +191,6 @@ class CollisionAvoidanceEnv(gym.Env):
 
         # Take observation
         next_observations = self._get_obs()
-
         if (
             Config.ANIMATE_EPISODES
             and self.episode_step_number % self.animation_period_steps == 0

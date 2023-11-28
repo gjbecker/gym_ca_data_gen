@@ -74,7 +74,7 @@ policy_dict = {
     "learning_ga3c": LearningPolicyGA3C,
     "static": StaticPolicy,
     "CADRL": CADRLPolicy,
-    'random': RandomPolicy
+    "random": RandomPolicy
 }
 
 # pypi version of pkg doesn't have RVO installed
@@ -229,7 +229,6 @@ def get_testcase_random(
         num_agents = np.random.randint(
             2, Config.MAX_NUM_AGENTS_IN_ENVIRONMENT + 1
         )
-
     # if side_length is a scalar, just use that directly (no randomness!)
     if type(side_length) is list:
         # side_length lists (range of num_agents, range of side_lengths) dicts
@@ -520,7 +519,7 @@ def cadrl_test_case_to_agents(
     elif type(policies) == list:
         if policy_distr is None:
             # No randomness in agent policies (1st agent gets policies[0], etc.)
-            assert len(policies) >= len(policy_distr)
+            assert len(policies) == num_agents
             agent_policy_list = policies
         else:
             # Random mix of agents following various policies
@@ -913,6 +912,112 @@ def gen_circle_test_case(num_agents, radius):
         tc[i, 2] = radius * np.cos(theta_end)
         tc[i, 3] = radius * np.sin(theta_end)
     return tc
+
+def circle_test_case_to_agents(
+    num_agents,
+    circle_radius,
+    policies="RVO",
+    policy_distr=None,
+    agents_dynamics="unicycle",
+    agents_sensors=["other_agents_states"],
+    policy_to_ensure=None,
+    prev_agents=None,
+    ):
+    ###############################
+    # policies: either a str denoting a policy everyone should follow
+    # This function accepts a test_case in legacy cadrl format and converts it
+    # into our new list of Agent objects. The legacy cadrl format is a list of
+    # [start_x, start_y, goal_x, goal_y, pref_speed, radius] for each agent.
+    ###############################
+    if type(num_agents) is list:
+        assert type(circle_radius) is list
+        test_case = gen_circle_test_case(num_agents[0], circle_radius[0])
+        for i in range(1,len(num_agents)):
+            test_case = np.append(test_case, gen_circle_test_case(num_agents[i], circle_radius[i]), axis=0)
+        num_agents = sum(num_agents)
+    else:
+        test_case = gen_circle_test_case(num_agents, circle_radius)
+    
+
+    agents = []
+    if type(policies) == str:
+        # Everyone follows the same one policy
+        agent_policy_list = [policies for _ in range(num_agents)]
+    elif type(policies) == list:
+        if policy_distr is None:
+            # No randomness in agent policies (1st agent gets policies[0], etc.)
+            assert len(policies) == num_agents
+            agent_policy_list = policies
+        else:
+            # Random mix of agents following various policies
+            assert len(policies) == len(policy_distr)
+            agent_policy_list = np.random.choice(
+                policies, num_agents, p=policy_distr
+            )
+            if (
+                policy_to_ensure is not None
+                and policy_to_ensure not in agent_policy_list
+            ):
+                # Make sure at least one agent is following the policy_to_ensure
+                #  (otherwise waste of time...)
+                random_agent_id = np.random.randint(len(agent_policy_list))
+                agent_policy_list[random_agent_id] = policy_to_ensure
+    else:
+        print("Only handle str or list of strs for policies.")
+        raise NotImplementedError
+
+    # agent_policy_list = [policy_dict[policy] for policy in agent_policy_list]
+    agent_dynamics_list = [agents_dynamics for _ in range(num_agents)]
+    # Look up the string name in each dict
+    agent_sensors_list = [
+        [sensor_dict[sensor] for sensor in agents_sensors]
+        for _ in range(num_agents)
+    ]
+
+    for i, agent in enumerate(test_case):
+        px = agent[0]
+        py = agent[1]
+        gx = agent[2]
+        gy = agent[3]
+        pref_speed = agent[4]
+        radius = agent[5]
+        if Config.EVALUATE_MODE:
+            # initial heading is pointed toward the goal
+            vec_to_goal = np.array([gx, gy]) - np.array([px, py])
+            heading = np.arctan2(vec_to_goal[1], vec_to_goal[0])
+        else:
+            heading = np.random.uniform(-np.pi, np.pi)
+        policy_str = agent_policy_list[i]
+        dynamics_str = agent_dynamics_list[i]
+        sensors = agent_sensors_list[i]
+
+        if prev_agents is not None and policy_str == prev_agents[i].policy.str:
+            prev_agents[i].reset(
+                px=px,
+                py=py,
+                gx=gx,
+                gy=gy,
+                pref_speed=pref_speed,
+                radius=radius,
+                heading=heading,
+            )
+            agents.append(prev_agents[i])
+        else:
+            new_agent = Agent(
+                px,
+                py,
+                gx,
+                gy,
+                radius,
+                pref_speed,
+                heading,
+                policy_dict[policy_str],
+                dynamics_dict[dynamics_str],
+                sensors,
+                i,
+            )
+            agents.append(new_agent)
+    return agents
 
 
 def make_testcase_huge(

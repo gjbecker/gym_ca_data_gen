@@ -27,15 +27,23 @@ def reset_env(
     policy,
     prev_agents,
 ):
-    # env.unwrapped.plot_policy_name = policy
+    env.unwrapped.plot_policy_name = policy
     test_case_args["num_agents"] = num_agents
     test_case_args["prev_agents"] = prev_agents
-    agents = test_case_fn(**test_case_args)
-    
+    if num_agents == 'circle':
+        rnd = np.random.rand()
+        if rnd < 0.3:
+            agents = tc.circle_test_case_to_agents(num_agents=4, circle_radius=1.5)
+        elif rnd > 0.7:
+            agents = tc.circle_test_case_to_agents(num_agents=[4, 4], circle_radius=[1.5, 3])
+        else:
+            agents = tc.circle_test_case_to_agents(num_agents=6, circle_radius=2.5)
+    else:
+        agents = test_case_fn(**test_case_args)
+
     env.set_agents(agents)
     init_obs = env.reset()
-    print(f'ENV: {env}')
-    # env.unwrapped.test_case_index = test_case
+    env.unwrapped.test_case_index = test_case
     return init_obs, agents
 
 
@@ -50,25 +58,24 @@ def main():
     Config.RECORD_PICKLE_FILES = True
     Config.GENERATE_DATASET = True
 
-    num_agents_to_test = range(3,4)
-    num_test_cases = 1
-
+    # num_agents_to_test = range(10,11)
+    num_agents_to_test = ['circle']
+    num_test_cases = 5000
+    policies = ['RVO']
     test_case_fn = tc.get_testcase_random
     test_case_args = {
-            'policy_to_ensure': 'RVO',
+            'policy_to_ensure': None,
             'policies': ['RVO', 'noncoop', 'static', 'random'],
-            'policy_distr': [0.75, 0.10, 0.075, 0.075],
-            # 'policy_distr': [1, 0, 0, 0],
+            # 'policy_distr': [0.75, 0.10, 0.075, 0.075],
+            'policy_distr': [1, 0, 0, 0],
             'speed_bnds': [0.5, 2.0],
             'radius_bnds': [0.2, 0.8],
             'side_length': [
-                {'num_agents': [0,5], 'side_length': [4,7]}, 
-                {'num_agents': [5,9], 'side_length': [7,11]},
-                {'num_agents': [9,np.inf], 'side_length': [10,13]}
+                {'num_agents': [0,5], 'side_length': [2,4]}, 
+                {'num_agents': [5,np.inf], 'side_length': [4,6]},
                 ],
             'agents_sensors': ['other_agents_states'],
         }
-    policies = ['mixed']
 
     env = create_env()
 
@@ -98,7 +105,7 @@ def main():
                 datasets = []
                 for test_case in range(num_test_cases):
                     ##### Actually run the episode ##########
-                    _ = reset_env(
+                    init_obs, _ = reset_env(
                         env,
                         test_case_fn,
                         test_case_args,
@@ -110,7 +117,7 @@ def main():
                     )
                     episode_stats, prev_agents, dataset = run_episode(env)
                     datasets.append(dataset)
-                    
+
                     # print(episode_stats)
                     df = store_stats(
                         df,

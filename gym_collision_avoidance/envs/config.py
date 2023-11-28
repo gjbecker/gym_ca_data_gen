@@ -12,8 +12,8 @@ class Config(object):
 
         ### DISPLAY
         self.ANIMATE_EPISODES    = False
-        self.SHOW_EPISODE_PLOTS = False
-        self.SAVE_EPISODE_PLOTS = False
+        self.SHOW_EPISODE_PLOTS = True
+        self.SAVE_EPISODE_PLOTS = True
         if not hasattr(self, "PLOT_CIRCLES_ALONG_TRAJ"):
             self.PLOT_CIRCLES_ALONG_TRAJ = True
         self.ANIMATION_PERIOD_STEPS = 5 # plot every n-th DT step (if animate mode on)
@@ -24,9 +24,9 @@ class Config(object):
             self.USE_STATIC_MAP = False
         
         ### TRAIN / PLAY / EVALUATE
-        self.TRAIN_MODE           = True # Enable to see the trained agent in action (for testing)
+        self.TRAIN_MODE           = False # Enable to see the trained agent in action (for testing)
         self.PLAY_MODE           = False # Enable to see the trained agent in action (for testing)
-        self.EVALUATE_MODE       = False # Enable to see the trained agent in action (for testing)
+        self.EVALUATE_MODE       = True # Enable to see the trained agent in action (for testing)
         
         ### REWARDS
         self.REWARD_AT_GOAL = 1.0 # reward given when agent reaches goal position
@@ -58,9 +58,8 @@ class Config(object):
             'speed_bnds': [0.5, 2.0],
             'radius_bnds': [0.2, 0.8],
             'side_length': [
-                {'num_agents': [0,5], 'side_length': [4,7]}, 
-                {'num_agents': [5,9], 'side_length': [7,11]},
-                {'num_agents': [9,np.inf], 'side_length': [10,13]}
+                {'num_agents': [0,5], 'side_length': [4,6]}, 
+                {'num_agents': [5,np.inf], 'side_length': [6,8]},
                 ],
             'agents_sensors': ['other_agents_states'],
         }
@@ -309,7 +308,6 @@ class CollectRegressionDataset(EvaluateConfig):
 
 class DataGeneration(EvaluateConfig):
     def __init__(self):
-        self.MAX_NUM_OTHER_AGENTS_OBSERVED = 19
         EvaluateConfig.__init__(self)
         self.SAVE_EPISODE_PLOTS = False
         self.SHOW_EPISODE_PLOTS = False
@@ -330,6 +328,43 @@ class DataGeneration(EvaluateConfig):
             'speed_bnds': [0.5, 2.0],
             'radius_bnds': [0.2, 0.8],
             'side_length': [
+                {'num_agents': [0,5], 'side_length': [4,6]}, 
+                {'num_agents': [5,np.inf], 'side_length': [6,8]},
+                ],
+            'agents_sensors': ['other_agents_states'],
+        }
+
+        # Normal
+        self.POLICIES_TO_TEST = [
+            'mixed'
+            ]
+        self.FIXED_RADIUS_AND_VPREF = False
+        self.NEAR_GOAL_THRESHOLD = 0.2
+
+class DataTesting(EvaluateConfig):
+    def __init__(self):
+        EvaluateConfig.__init__(self)
+        self.EVALUATE_MODE = True
+        self.DT = 0.1
+        self.SAVE_EPISODE_PLOTS = True
+        self.SHOW_EPISODE_PLOTS = True
+        self.ANIMATE_EPISODES = False
+        self.PLOT_CIRCLES_ALONG_TRAJ = True
+        self.PLT_LIMITS = [[-15, 15], [-15, 15]]
+
+        self.NUM_TEST_CASES = 100
+        self.NUM_AGENTS_TO_TEST = 4
+        self.RECORD_PICKLE_FILES = False
+        self.GENERATE_DATASET = False
+
+        self.TEST_CASE_ARGS = {
+            'policy_to_ensure': 'RVO',
+            'policies': ['RVO', 'noncoop', 'static', 'random'],
+            'policy_distr': [0.75, 0.10, 0.075, 0.075],
+            # 'policy_distr': [1, 0, 0, 0],
+            'speed_bnds': [0.5, 2.0],
+            'radius_bnds': [0.2, 0.8],
+            'side_length': [
                 {'num_agents': [0,5], 'side_length': [4,7]}, 
                 {'num_agents': [5,9], 'side_length': [7,11]},
                 {'num_agents': [9,np.inf], 'side_length': [10,13]}
@@ -339,7 +374,7 @@ class DataGeneration(EvaluateConfig):
 
         # Normal
         self.POLICIES_TO_TEST = [
-            'mixed'
+            'RVO'
             ]
         self.FIXED_RADIUS_AND_VPREF = False
         self.NEAR_GOAL_THRESHOLD = 0.2
