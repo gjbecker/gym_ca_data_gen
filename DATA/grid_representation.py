@@ -54,7 +54,7 @@ def draw(grid, RES, side, x_coord, y_coord, rad, value, print_grid=False):
     return grid
 
 
-def episode_grid(episode, RES=512, side=8.5, agent_r=2, goal_r=0.2, step_range=None, plot=False):
+def episode_grid(episode, RES=512, side=7.5, agent_r=2, goal_r=0.2, step_range=None, plot=False):
     agents = np.arange(len(episode['radii']))
     radii = episode['radii']
     goals = episode['goals']
@@ -95,7 +95,7 @@ def episode_grid(episode, RES=512, side=8.5, agent_r=2, goal_r=0.2, step_range=N
     # print(f'OBS RESHAPE: {np.array(obs).reshape((-1,3,RES,RES)).shape}')
     return np.array(obs)
 
-def step_grid(data, RES=512, side=8.5, agent_r=2, goal_r=0.2, plot=False):
+def step_grid(data, RES=512, side=7.5, agent_r=2, goal_r=0.2, plot=False):
     agents = np.arange(len(data['radii']))
     radii = data['radii']
     goals = data['goals']
