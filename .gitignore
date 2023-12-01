@@ -16,6 +16,7 @@ venv*/
 
 DATA/datasets/
 DATA/results/
+DATA/example/
 
 venv
 log
