@@ -30,7 +30,7 @@ def reset_env(
     env.unwrapped.plot_policy_name = policy
     test_case_args["num_agents"] = num_agents
     test_case_args["prev_agents"] = prev_agents
-    if num_agents == 'circle':
+    if policy == 'circle':
         rnd = np.random.rand()
         if rnd < 0.3:
             agents = tc.circle_test_case_to_agents(num_agents=4, circle_radius=2.5)
@@ -68,9 +68,9 @@ def main():
     Config.GETTING_CLOSE_RANGE = 0.2 # meters between agents' boundaries for collision
 
     # num_agents_to_test = range(10,11)
-    num_agents_to_test = ['circle']
+    num_agents_to_test = 4
     num_test_cases = 5000
-    policies = ['RVO']
+    policies = ['circle']
     test_case_fn = tc.get_testcase_random
     test_case_args = {
             'policy_to_ensure': None,
@@ -102,12 +102,12 @@ def main():
         * num_test_cases
     ) as pbar:
         for num_agents in num_agents_to_test:
-            env.set_plot_save_dir(
-                os.path.dirname(os.path.realpath(__file__))
-                + "/DATA/results/{num_agents}_agents/figs/"
-                .format(num_agents=num_agents)
-            )
             for policy in policies:
+                env.set_plot_save_dir(
+                os.path.dirname(os.path.realpath(__file__))
+                + "/DATA/results/{policy}_{num_agents}_agents/figs/"
+                .format(policy=policy, num_agents=num_agents)
+            )
                 np.random.seed(0)
                 prev_agents = None
                 df = pd.DataFrame()
@@ -147,11 +147,12 @@ def main():
                     file_dir = os.path.dirname(
                         os.path.realpath(__file__)
                     ) + "/DATA/results/"
-                    file_dir += "{num_agents}_agents/stats/".format(
+                    file_dir += "{policy}_{num_agents}_agents/stats/".format(
+                        policy=policy,
                         num_agents=num_agents
                     )
                     os.makedirs(file_dir, exist_ok=True)
-                    log_filename = file_dir + "/stats_{}.p".format(policy)
+                    log_filename = file_dir + "/stats.p"
                     df.to_pickle(log_filename)
     return True
 
