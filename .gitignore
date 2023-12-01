@@ -14,9 +14,8 @@ venv*/
 
 .vscode
 
-DATA/datasets
-DATA/results
-DATA/example
+DATA/datasets/
+DATA/results/
 
 venv
 log
