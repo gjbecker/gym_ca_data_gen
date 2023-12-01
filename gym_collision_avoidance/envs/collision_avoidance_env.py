@@ -436,7 +436,7 @@ class CollisionAvoidanceEnv(gym.Env):
                             <= Config.GETTING_CLOSE_RANGE
                         ):
                             rewards[i] = (
-                                -0.1 - dist_btwn_nearest_agent[i] / 2.0
+                                self.reward_getting_close + dist_btwn_nearest_agent[i] / 2.0
                             )
                             # print("Agent %i: Got close to another agent!"
                             #       % agent.id)
