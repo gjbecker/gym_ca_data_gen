@@ -2,7 +2,7 @@ import os
 import pickle
 import time
 import logging
-
+import configparser
 import numpy as np
 import pandas as pd
 from tqdm import tqdm
@@ -16,6 +16,8 @@ from gym_collision_avoidance.experiments.src.env_utils import (
     run_episode,
     store_stats,
 )
+rewCONF = configparser.ConfigParser()
+rewCONF.read('reward.config')
 
 def reset_env(
     env,
@@ -54,23 +56,27 @@ def main():
     Config.SAVE_EPISODE_PLOTS = True
     Config.SHOW_EPISODE_PLOTS = True
     Config.DT = 0.1
+    Config.USE_STATIC_MAP = False
     Config.PLOT_CIRCLES_ALONG_TRAJ = True
     Config.RECORD_PICKLE_FILES = True
     Config.GENERATE_DATASET = True
     Config.PLT_LIMITS = [[-8, 8], [-8, 8]]
 
     # REWARD params
-    Config.REWARD_AT_GOAL = 1.0 # reward given when agent reaches goal position
-    Config.REWARD_COLLISION_WITH_AGENT = -0.25 # reward given when agent collides with another agent
-    Config.REWARD_COLLISION_WITH_WALL = -0.25 # reward given when agent collides with wall
-    Config.REWARD_GETTING_CLOSE   = -0.1 # reward when agent gets close to another agent (unused?)
-    Config.REWARD_TIME_STEP   = 0.0 # default reward given if none of the others apply (encourage speed with neg)
-    Config.GETTING_CLOSE_RANGE = 0.2 # meters between agents' boundaries for collision
+    rewardtype = 'default'
+    Config.REWARD_AT_GOAL = rewCONF.getfloat(rewardtype, 'reach_goal')
+    Config.REWARD_COLLISION_WITH_AGENT = rewCONF.getfloat(rewardtype, 'collision_agent')
+    Config.REWARD_COLLISION_WITH_WALL = -rewCONF.getfloat(rewardtype, 'collision_wall')
+    Config.REWARD_GETTING_CLOSE   = rewCONF.getfloat(rewardtype, 'close_reward')
+    Config.GETTING_CLOSE_RANGE = rewCONF.getfloat(rewardtype, 'close_range')
+    Config.REWARD_TIME_STEP   = rewCONF.getfloat(rewardtype, 'timestep')
 
+    # Data Gen params
     # num_agents_to_test = range(10,11)
     num_agents_to_test = 4
     num_test_cases = 5000
-    policies = ['circle']
+    policies = ['reward1']
+
     test_case_fn = tc.get_testcase_random
     test_case_args = {
             'policy_to_ensure': None,
@@ -85,7 +91,7 @@ def main():
                 ],
             'agents_sensors': ['other_agents_states'],
         }
-
+    #######################################################################
     env = create_env()
 
     print(
@@ -144,15 +150,10 @@ def main():
                     print(f'Generated Dataset Length: {len(datasets)}')
 
                 if Config.RECORD_PICKLE_FILES:
-                    file_dir = os.path.dirname(
-                        os.path.realpath(__file__)
-                    ) + "/DATA/results/"
-                    file_dir += "{policy}_{num_agents}_agents/stats/".format(
-                        policy=policy,
-                        num_agents=num_agents
-                    )
+                    file_dir = os.path.dirname(os.path.realpath(__file__)) + "/DATA/results/"
+                    file_dir += "{policy}_{num_agents}_agents/stats/".format(policy=policy, num_agents=num_agents)
                     os.makedirs(file_dir, exist_ok=True)
-                    log_filename = file_dir + "/stats.p"
+                    log_filename = file_dir + "/{}_{}_{}_stats.p".format(policy, num_agents, num_test_cases)
                     df.to_pickle(log_filename)
     return True
 
