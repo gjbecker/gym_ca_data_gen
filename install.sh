@@ -34,6 +34,7 @@ fi
 python setup.py build
 python setup.py install
 
+python -m pip install scipy
 # Install DRL Long's requirements
 # python -m pip install torch torchvision
 

@@ -10,5 +10,5 @@ print_header "Running dataset generation python script"
 # export CUDA_VISIBLE_DEVICES=-1
 
 # Experiment
-cd $DIR
-python src/create_dataset.py
+#cd $DIR
+python create_dataset.py
