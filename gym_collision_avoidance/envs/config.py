@@ -42,6 +42,7 @@ class Config(object):
         # self.SOCIAL_NORMS = "right"
         # self.SOCIAL_NORMS = "left"
         self.SOCIAL_NORMS = "none"
+        self.REACHER = False
 
         ### SIMULATION
         self.DT             = 0.2 # seconds between simulation time steps

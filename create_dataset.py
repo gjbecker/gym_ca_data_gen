@@ -37,9 +37,9 @@ def reset_env(
         if rnd < 0.3:
             agents = tc.circle_test_case_to_agents(num_agents=4, circle_radius=2.5)
         elif rnd > 0.7:
-            agents = tc.circle_test_case_to_agents(num_agents=[4, 4], circle_radius=[2, 3.5])
+            agents = tc.circle_test_case_to_agents(num_agents=[4, 4], circle_radius=[2.5, 4.5])
         else:
-            agents = tc.circle_test_case_to_agents(num_agents=6, circle_radius=3)
+            agents = tc.circle_test_case_to_agents(num_agents=6, circle_radius=3.5)
     else:
         agents = test_case_fn(**test_case_args)
 
@@ -70,12 +70,14 @@ def main():
     Config.REWARD_GETTING_CLOSE   = rewCONF.getfloat(rewardtype, 'close_reward')
     Config.GETTING_CLOSE_RANGE = rewCONF.getfloat(rewardtype, 'close_range')
     Config.REWARD_TIME_STEP   = rewCONF.getfloat(rewardtype, 'timestep')
+    Config.REACHER = rewCONF.getboolean(rewardtype, 'reacher')
 
     # Data Gen params
     # num_agents_to_test = range(10,11)
-    num_agents_to_test = 4
+    # num_agents_to_test = [4, 10]
+    num_agents_to_test = ['multi']
     num_test_cases = 5000
-    policies = ['reward1']
+    policies = ['circle']
 
     test_case_fn = tc.get_testcase_random
     test_case_args = {

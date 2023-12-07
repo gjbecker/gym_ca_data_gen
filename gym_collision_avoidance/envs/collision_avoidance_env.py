@@ -63,6 +63,7 @@ class CollisionAvoidanceEnv(gym.Env):
         # Collision Parameters
         self.collision_dist = Config.COLLISION_DIST
         self.getting_close_range = Config.GETTING_CLOSE_RANGE
+        self.reacher = Config.REACHER
 
         # Plotting Parameters
         self.evaluate = Config.EVALUATE_MODE
@@ -400,57 +401,70 @@ class CollisionAvoidanceEnv(gym.Env):
         """
 
         # if nothing noteworthy happened in that timestep, reward = -0.01
-        rewards = self.reward_time_step * np.ones(len(self.agents))
+        time_remaining = np.array([a.time_remaining_to_reach_goal for a in self.agents])
+        time = np.array([a.t for a in self.agents])
+        rewards = self.reward_time_step * np.ones(len(self.agents)) * 1 / (time+time_remaining * (1/Config.DT))
+       
         (
             collision_with_agent,
             collision_with_wall,
             entered_norm_zone,
             dist_btwn_nearest_agent,
         ) = self._check_for_collisions()
+        if self.reacher:
+            radii = np.array([a.radius for a in self.agents])
+            reward_goal_dist = np.array([l2norm(
+                a.pos_global_frame,
+                a.goal_global_frame,
+            ) for a in self.agents]) - radii - Config.NEAR_GOAL_THRESHOLD
+            
+            reward_agent_dist = dist_btwn_nearest_agent
 
-        for i, agent in enumerate(self.agents):
-            if agent.is_at_goal:
-                if agent.was_at_goal_already is False:
-                    # agents should only receive the goal reward once
-                    rewards[i] = self.reward_at_goal
-                    # print("Agent %i: Arrived at goal!"
-                    # % agent.id)
-            else:
-                # agents at their goal shouldn't be penalized if someone else
-                # bumps into them
-                if agent.was_in_collision_already is False:
-                    if collision_with_agent[i]:
-                        rewards[i] = self.reward_collision_with_agent
-                        agent.in_collision = True
-                        # print("Agent %i: Collision with another agent!"
-                        #       % agent.id)
-                    elif collision_with_wall[i]:
-                        rewards[i] = self.reward_collision_with_wall
-                        agent.in_collision = True
-                        # print("Agent %i: Collision with wall!"
+            rewards = -reward_goal_dist + reward_agent_dist
+        else:
+            for i, agent in enumerate(self.agents):
+                if agent.is_at_goal:
+                    if agent.was_at_goal_already is False:
+                        # agents should only receive the goal reward once
+                        rewards[i] = self.reward_at_goal
+                        # print("Agent %i: Arrived at goal!"
                         # % agent.id)
-                    else:
-                        # There was no collision
-                        if (
-                            dist_btwn_nearest_agent[i]
-                            <= Config.GETTING_CLOSE_RANGE
-                        ):
-                            rewards[i] = (
-                                self.reward_getting_close + dist_btwn_nearest_agent[i] / 2.0
-                            )
-                            # print("Agent %i: Got close to another agent!"
+                else:
+                    # agents at their goal shouldn't be penalized if someone else
+                    # bumps into them
+                    if agent.was_in_collision_already is False:
+                        if collision_with_agent[i]:
+                            rewards[i] = self.reward_collision_with_agent
+                            agent.in_collision = True
+                            # print("Agent %i: Collision with another agent!"
                             #       % agent.id)
-                        if (
-                            abs(agent.past_actions[0, 1])
-                            > self.wiggly_behavior_threshold
-                        ):
-                            # Slightly penalize wiggly behavior
-                            rewards[i] += self.reward_wiggly_behavior
-                        # elif entered_norm_zone[i]:
-                        #     rewards[i] = self.reward_entered_norm_zone
-        rewards = np.clip(
-            rewards, self.min_possible_reward, self.max_possible_reward
-        )
+                        elif collision_with_wall[i]:
+                            rewards[i] = self.reward_collision_with_wall
+                            agent.in_collision = True
+                            # print("Agent %i: Collision with wall!"
+                            # % agent.id)
+                        else:
+                            # There was no collision
+                            if (
+                                dist_btwn_nearest_agent[i]
+                                <= Config.GETTING_CLOSE_RANGE
+                            ):
+                                rewards[i] = (
+                                    self.reward_getting_close + dist_btwn_nearest_agent[i] / 2.0
+                                )
+                                # print("Agent %i: Got close to another agent!"
+                                #       % agent.id)
+                            if (
+                                abs(agent.past_actions[0, 1])
+                                > self.wiggly_behavior_threshold
+                            ):
+                                # Slightly penalize wiggly behavior
+                                rewards[i] += self.reward_wiggly_behavior
+                            # elif entered_norm_zone[i]:
+                            #     rewards[i] = self.reward_entered_norm_zone
+            rewards = np.clip(
+                rewards, self.min_possible_reward, self.max_possible_reward
+            )
         if Config.TRAIN_SINGLE_AGENT:
             rewards = rewards[0]
         return rewards

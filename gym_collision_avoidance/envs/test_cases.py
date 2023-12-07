@@ -900,17 +900,17 @@ def preset_testCases(
     return test_cases
 
 
-def gen_circle_test_case(num_agents, radius):
+def gen_circle_test_case(num_agents, radius, delta=0.2):
     tc = np.zeros((num_agents, 6))
     for i in range(num_agents):
-        tc[i, 4] = 1.0
-        tc[i, 5] = 0.5
+        tc[i, 4] = 1.0  # Pref speed
+        tc[i, 5] = 0.5  # Radius
         theta_start = (2 * np.pi / num_agents) * i
         theta_end = theta_start + np.pi
-        tc[i, 0] = radius * np.cos(theta_start)
-        tc[i, 1] = radius * np.sin(theta_start)
-        tc[i, 2] = radius * np.cos(theta_end)
-        tc[i, 3] = radius * np.sin(theta_end)
+        tc[i, 0] = radius * np.cos(theta_start)  + np.random.uniform(-delta, delta)
+        tc[i, 1] = radius * np.sin(theta_start) + np.random.uniform(-delta, delta)
+        tc[i, 2] = radius * np.cos(theta_end) + np.random.uniform(-delta, delta)
+        tc[i, 3] = radius * np.sin(theta_end) + np.random.uniform(-delta, delta)
     return tc
 
 def circle_test_case_to_agents(
