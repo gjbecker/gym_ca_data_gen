@@ -55,6 +55,7 @@ def main():
     Config.EVALUATE_MODE = True
     Config.SAVE_EPISODE_PLOTS = True
     Config.SHOW_EPISODE_PLOTS = True
+    Config.ANIMATE_EPISODES = False
     Config.DT = 0.1
     Config.USE_STATIC_MAP = False
     Config.PLOT_CIRCLES_ALONG_TRAJ = True
@@ -74,10 +75,10 @@ def main():
 
     # Data Gen params
     # num_agents_to_test = range(10,11)
-    # num_agents_to_test = [4, 10]
-    num_agents_to_test = ['multi']
+    num_agents_to_test = [4]
+    # num_agents_to_test = ['multi']
     num_test_cases = 5000
-    policies = ['circle']
+    policies = ['RVO_test']
 
     test_case_fn = tc.get_testcase_random
     test_case_args = {
