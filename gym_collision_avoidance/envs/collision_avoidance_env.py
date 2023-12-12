@@ -421,6 +421,10 @@ class CollisionAvoidanceEnv(gym.Env):
             reward_agent_dist = dist_btwn_nearest_agent
 
             rewards = -reward_goal_dist + reward_agent_dist
+
+            for i, agent in enumerate(self.agents):
+                if agent.is_at_goal:
+                    rewards[i] = 0
         else:
             for i, agent in enumerate(self.agents):
                 if agent.is_at_goal:

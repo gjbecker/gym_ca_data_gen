@@ -101,6 +101,14 @@ def run_episode(env):
     extra_time_to_goal = np.array(
         [a.t - a.straight_line_time_to_reach_goal for a in agents]
     )
+    collisions, at_goal, stuck = 0,0,0
+    for a in agents:
+        if a.in_collision:
+            collisions += 1
+        elif a.is_at_goal:
+            at_goal += 1
+        else:
+            stuck += 1
     collision = np.array(np.any([a.in_collision for a in agents])).tolist()
     all_at_goal = np.array(np.all([a.is_at_goal for a in agents])).tolist()
     any_stuck = np.array(
@@ -114,9 +122,9 @@ def run_episode(env):
         "time_to_goal": time_to_goal,
         "total_time_to_goal": np.sum(time_to_goal),
         "extra_time_to_goal": extra_time_to_goal,
-        "collision": collision,
-        "all_at_goal": all_at_goal,
-        "any_stuck": any_stuck,
+        "% collisions": collisions/len(agents),
+        "% at_goal": at_goal/len(agents),
+        "% stuck": stuck/len(agents),
         "outcome": outcome,
         "policies": [agent.policy.str for agent in agents],
     }
